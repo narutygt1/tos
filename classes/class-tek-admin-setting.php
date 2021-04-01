@@ -117,6 +117,26 @@ class TEK_Admin_Setting
 
 	}
 
+	public function html_display_text_field( $data = array() ) {
+		extract( $data ); ?>
+		<input type="text" name="ch3sapi_options[<?php echo $name; ?>]" value="<?php echo $value; ?>"/><br />
+	<?php 
+	}
+
+	public function html_display_check_box( $data = array() ) {
+		extract ( $data );
+		?>
+		<input type="checkbox" name="ch3sapi_options[<?php echo $name; ?>]" <?php if ( $value ) echo ' checked="checked" '; ?> />
+	<?php 
+	}
+
+	public function html_display_text_area( $data = array() ) {
+		extract ( $data );
+		?>
+		<textarea type='text' name='ch3sapi_options[<?php echo $name; ?>]' rows='5' cols='30'><?php echo $value; ?></textarea>
+	<?php 
+	}
+
 	public function uninstall() {	 
 		// Check if options exist and delete them if present 
 		if ( get_option( $this->option_name ) != false ) { 
@@ -151,7 +171,7 @@ class TEK_Admin_Setting
 		add_settings_field( 
 			$id, 
 			$name,
-			field_type($type), 
+			array( $this, $this->field_type($type) ), 
 			$arr_setting["section"],
 			$arr_setting["id"], 
 			$args_field 
@@ -189,26 +209,6 @@ class TEK_Admin_Setting
 			return 'html_display_text_area';
 		else
 			return '';
-	}
-
-	protected function html_display_text_field( $data = array() ) {
-		extract( $data ); ?>
-		<input type="text" name="ch3sapi_options[<?php echo $name; ?>]" value="<?php echo $value; ?>"/><br />
-	<?php 
-	}
-
-	protected function html_display_check_box( $data = array() ) {
-		extract ( $data );
-		?>
-		<input type="checkbox" name="ch3sapi_options[<?php echo $name; ?>]" <?php if ( $value ) echo ' checked="checked" '; ?> />
-	<?php 
-	}
-
-	protected function html_display_text_area( $data = array() ) {
-		extract ( $data );
-		?>
-		<textarea type='text' name='ch3sapi_options[<?php echo $name; ?>]' rows='5' cols='30'><?php echo $value; ?></textarea>
-	<?php 
 	}
 	#endregion
 

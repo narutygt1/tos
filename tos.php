@@ -16,18 +16,34 @@ $page = new TEK_Admin_Setting("tokitek_options");
 
 $page->register_page(
   array(
-    'page_title' => 'hello worlds',
-    'menu_title' => 'tokitek',
-    'capability' => 'manage_options',
-    'menu_slug' => 'hello_page'
+    'page_title'  => 'hello worlds',
+    'menu_title'  => 'tokitek',
+    'capability'  => 'manage_options',
+    'menu_slug'   => 'hello_page'
   )
 );
 
 $page->register_setting(
   array(
-    'id' => 'ch3sapi_main_section',
-    'title' => 'Main Settings',
+    'id'      => 'ch3sapi_main_section',
+    'title'   => 'Main Settings',
     'section' => 'ch3sapi_settings_section'
   )
 );
 
+$page->register_field(
+	array( 
+		'id'	=>	'tek_textbox',
+		'name' 	=> 'My Name is',
+		'value' => 'tokitek'
+	)
+);
+
+$page->register_field(
+	array( 
+		'id'	=>	'tek_checkbox',
+		'name' 	=> 'He is Smart',
+		'value' => true,
+		'type'	=> 'checkbox' 
+	)
+);
