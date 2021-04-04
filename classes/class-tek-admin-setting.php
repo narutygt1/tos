@@ -76,9 +76,10 @@ class TEK_Admin_Setting
 	public function register_setting($args = array()) {
 
 		$default_setting = array(
-			'id'		=>	'',
-			'title'		=>	'',
-			'section'	=>	''
+			'setting_id'			=>	'',
+			'setting_title'			=>	'',
+			'setting_section_id'	=>	'',
+			'setting_section_page' 	=>	''
 		);
 
 		$merged_setting = wp_parse_args( $args, $default_setting );
@@ -93,6 +94,7 @@ class TEK_Admin_Setting
 
 		$default_field = array(
 			'id'	=>	'',
+			'title'	=>	'',
 			'name' 	=>	'',
 			'value' =>	'',
 			'type' 	=>	'textbox'
@@ -113,27 +115,28 @@ class TEK_Admin_Setting
 		
 	}
 
-	public function validate_options() {
-
+	public function validate_options( $input ) {
+		return $input;
 	}
 
 	public function html_display_text_field( $data = array() ) {
 		extract( $data ); ?>
-		<input type="text" name="ch3sapi_options[<?php echo $name; ?>]" value="<?php echo $value; ?>"/><br />
+
+		<input type="text" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" value="<?php echo $value; ?>"/><br />
 	<?php 
 	}
 
 	public function html_display_check_box( $data = array() ) {
-		extract ( $data );
-		?>
-		<input type="checkbox" name="ch3sapi_options[<?php echo $name; ?>]" <?php if ( $value ) echo ' checked="checked" '; ?> />
+		extract ( $data ); ?>
+		
+		<input type="checkbox" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" <?php if ( $value ) echo ' checked="checked" '; ?> />
 	<?php 
 	}
 
 	public function html_display_text_area( $data = array() ) {
-		extract ( $data );
-		?>
-		<textarea type='text' name='ch3sapi_options[<?php echo $name; ?>]' rows='5' cols='30'><?php echo $value; ?></textarea>
+		extract ( $data ); ?>
+
+		<textarea type='text' name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" rows='5' cols='30'><?php echo $value; ?></textarea>
 	<?php 
 	}
 
@@ -151,16 +154,16 @@ class TEK_Admin_Setting
 		extract( $args_setting );
 
 		register_setting( 
-			$this->option_group,
+			$setting_id,
 			$this->option_name,
 			array( $this, 'validate_options' )
 		);
 
 		add_settings_section( 
-			$id,
-			$title, 
+			$setting_section_id,
+			$setting_title, 
 			array( $this, 'main_setting_section_callback' ),
-			$section );
+			$setting_section_page );
 	}
 
 	private function register_field_init($args_field) {
@@ -170,10 +173,10 @@ class TEK_Admin_Setting
 
 		add_settings_field( 
 			$id, 
-			$name,
+			$title,
 			array( $this, $this->field_type($type) ), 
-			$arr_setting["section"],
-			$arr_setting["id"], 
+			$arr_setting["setting_section_page"],
+			$arr_setting["setting_section_id"], 
 			$args_field 
 		);
 	}
@@ -189,8 +192,8 @@ class TEK_Admin_Setting
 
 			<form name="<?php echo $this->option_name ?>_form_settings_api" method="post" action="options.php">
 
-			<?php settings_fields( $arr_setting["id"] ); ?>
-			<?php do_settings_sections( $arr_setting["section"] ); ?> 
+			<?php settings_fields( $arr_setting["setting_id"] ); ?>
+			<?php do_settings_sections( $arr_setting["setting_section_page"] ); ?> 
 
 			<input type="submit" value="Submit" class="button-primary" />
 			
