@@ -116,13 +116,29 @@ class TEK_Admin_Setting
 	}
 
 	public function validate_options( $input ) {
+
+		// foreach ( array( 'ga_account_name', 'select_list', 'text_area_desc' ) as $option_name ) { 
+		// 	if ( isset( $input[$option_name] ) ) { 
+		// 		$input[$option_name] = 
+		// 			sanitize_text_field( $input[$option_name] ); 
+		// 	} 
+		// } 
+
+		// foreach ( array( 'track_outgoing_links' ) as $option_name ) { 
+		// 	if ( isset( $input[$option_name] ) ) { 
+		// 		$input[$option_name] = true; 
+		// 	} else { 
+		// 		$input[$option_name] = false; 
+		// 	} 
+		// }
+
 		return $input;
 	}
 
 	public function html_display_text_field( $data = array() ) {
 		extract( $data ); ?>
 
-		<input type="text" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" value="<?php echo $value; ?>"/><br />
+		<input type="text" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" value="<?php echo esc_html( $this->value_by_name($data) ); ?>"/><br />
 	<?php 
 	}
 
@@ -180,6 +196,15 @@ class TEK_Admin_Setting
 			$args_field 
 		);
 	}
+
+	private function value_by_name($default_value){
+		$options = $this->set_option();
+
+		$option_value = isset($options[$default_value["name"]]) ? $options[$default_value["name"]] : $default_value["value"];
+
+		return $option_value;
+	}
+
 	#endregion
 
 	#region protected

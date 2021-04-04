@@ -36,7 +36,7 @@ $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_textbox',
     'title' 	=>  'My Name is',
-		'name' 	  =>  'tek_textbox',
+		'name' 	  =>  'name_text',
 		'value'   =>  'tokitek'
 	)
 );
@@ -45,7 +45,7 @@ $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_checkbox',
 		'title' 	=>  'He is Smart',
-    'name' 	  =>  'He is Smart',
+    'name' 	  =>  'is_smart',
 		'value'   =>  true,
 		'type'	  =>  'checkbox' 
 	)
