@@ -7,6 +7,7 @@
   Version: 1.0
   Author URI: 
  */
+
 define( 'TOS_PLUGIN_PATH', __FILE__ );
 define( 'TOS_PLUGIN_DIR', plugin_dir_path(__FILE__) );
 define( 'TOS_CLASSES_DIR', TOS_PLUGIN_DIR . 'classes/' );
@@ -23,12 +24,21 @@ $admin_setting_page->register_page(
   )
 );
 
+$admin_setting_page->register_nav_tabs(
+  array(
+      'basic'         =>  'Basic',
+      'order_setting' =>  'Order Setting',
+      'lalamove_setting'  =>  'Lalamove'
+  )
+);
+
 $admin_setting_page->register_setting(
   array(
-    'setting_id'      => 'tokitek_settings',
-    'setting_title'   => 'Main Settings',
+    'setting_id'      =>  'tokitek_settings',
+    'setting_title'   =>  'Main Settings',
     'setting_section_id' => 'tokitek_main_section',
-    'setting_section_page' => 'tokitek_settings_section'
+    'setting_section_page' => 'tokitek_settings_section',
+    'tab_slug'        =>  'order_setting'
   )
 );
 
@@ -48,5 +58,30 @@ $admin_setting_page->register_field(
     'name' 	  =>  'is_smart',
 		'value'   =>  true,
 		'type'	  =>  'checkbox' 
+	)
+);
+
+$admin_setting_page->register_field(
+	array( 
+		'id'	    =>  'tek_select',
+		'title' 	=>  'Default Page',
+    'name' 	  =>  'default_page',
+		'value'   =>  'Second',
+		'type'	  =>  'select',
+    'choices' =>  array(
+        'First',
+        'Second',
+        'Third'
+    )
+	)
+);
+
+$admin_setting_page->register_field(
+	array( 
+		'id'	    =>  'tek_textarea',
+    'title' 	=>  'Details',
+		'name' 	  =>  'details',
+    'type'	  =>  'textarea',
+		'value'   =>  ''
 	)
 );

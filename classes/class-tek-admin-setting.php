@@ -2,6 +2,8 @@
 
 class TEK_Admin_Setting
 {
+
+	#region variables
 	/**
 	 * Option Name.
 	 * @var string
@@ -15,6 +17,18 @@ class TEK_Admin_Setting
 	protected $option_group;
 
 	/**
+	 * Variables Page.
+	 * @var array
+	 */
+	protected $register_page_vars;
+
+	/**
+	 * Variables Nav Tabs.
+	 * @var array
+	 */
+	protected $register_nav_tab_vars;
+
+	/**
 	 * Variables Setting.
 	 * @var array
 	 */
@@ -25,6 +39,7 @@ class TEK_Admin_Setting
 	 * @var array
 	 */
 	protected $register_setting_fields_vars;
+	#endregion
 
 	function __construct($option_name){
 		$this->option_name = $option_name;
@@ -40,7 +55,6 @@ class TEK_Admin_Setting
     }
 
 	#region public
-
 	public function set_option($args = array()) {
 		$options = get_option( $this->option_name , array() );
 
@@ -53,17 +67,21 @@ class TEK_Admin_Setting
 	    return $merged_option;
 	}
 
+	public function get_value_by_name ($name) {
+		return self::get_option_value($this->option_name, $name);
+	}
+
 	public function register_page($args = array()) {
 		
 		$default_page = array (
 			'page_title' => '',
 			'menu_title' => '',
 			'capability' => 'manage_options',
-			'menu_slug' => '',
-			
+			'menu_slug' => ''
 		);
 
 		$merged_page = wp_parse_args( $args, $default_page );
+		$this->register_page_vars = $merged_page;
 
 		add_action( 'admin_menu', function() use ($merged_page) {
 			extract($merged_page);
@@ -77,6 +95,13 @@ class TEK_Admin_Setting
 					$this->config_page_load();
 				 } );
 		} );
+	}
+
+	public function register_nav_tabs($args = array()) {
+
+		$default_nav_tabs  = array();
+		$merged_nav_tabs = wp_parse_args( $args, $default_nav_tabs );
+		$this->register_nav_tab_vars = $merged_nav_tabs;
 	}
 
 	public function register_setting($args = array()) {
@@ -123,12 +148,12 @@ class TEK_Admin_Setting
 	}
 
 	public function validate_options( $input ) {
-		$local_setting_fields_vars = $this->register_setting_fields_vars;
-		foreach ( $local_setting_fields_vars as $field_name => $field_value ) {
+		foreach ( $this->register_setting_fields_vars as $field_name => $field_value ) {
 
 				switch ($field_value["type"]) {
 					case "textbox":
 					case "textarea":
+					case "select":
 						if ( isset( $input[$field_name] ) ) { 
 							$input[$field_name] = sanitize_text_field( $input[$field_name] ); 
 						}
@@ -141,31 +166,42 @@ class TEK_Admin_Setting
 						}
 					break;
 					default:
-						//code to be executed if n is different from all labels;
+						// do something...
 			}
 		}
 
 		return $input;
 	}
 
-	public function html_display_text_field( $data = array() ) {
+	public function html_display_textbox( $data = array() ) {
 		extract( $data ); ?>
 
 		<input type="text" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" value="<?php echo esc_html( $this->value_by_name($data) ); ?>"/><br />
 	<?php 
 	}
 
-	public function html_display_check_box( $data = array() ) {
+	public function html_display_checkbox( $data = array() ) {
 		extract ( $data ); ?>
 		
 		<input type="checkbox" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" <?php if ( $this->value_by_name($data) ) echo ' checked="checked" '; ?> />
 	<?php 
 	}
 
-	public function html_display_text_area( $data = array() ) {
+	public function html_display_textarea( $data = array() ) {
 		extract ( $data ); ?>
 
 		<textarea type='text' name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" rows='5' cols='30'><?php echo esc_html( $this->value_by_name($data) ); ?></textarea>
+	<?php 
+	}
+
+	public function html_display_select( $data = array() ) {
+		extract ( $data ); ?>
+
+		<select name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>">  
+			<?php foreach( $choices as $item ) { ?>
+				<option value="<?php echo $item; ?>" <?php selected( $this->value_by_name($data) == $item ); ?>><?php echo $item; ?></option>;  
+			<?php } ?>
+		</select>  
 	<?php 
 	}
 
@@ -235,9 +271,9 @@ class TEK_Admin_Setting
 	#endregion
 
 	#region protected
-
 	protected function config_page_load() {
 		$arr_setting = $this->register_setting_vars;
+		$this->nav_tabs_load();
 		?>
 
 		<div id="<?php echo $this->option_name ?>" class="wrap">
@@ -255,24 +291,73 @@ class TEK_Admin_Setting
 	<?php
 	}
 
+	public function nav_tabs_load() {
+
+		extract ( $this->register_page_vars );
+
+		// get query string parameters
+		if ( isset( $_GET['tab_slug'] ) ) {
+			$tab_slug_url = strval( $_GET['tab_slug'] ); 
+		}else{
+			$tab_slug_url = '';
+		}
+
+		foreach ( $this->register_nav_tab_vars as $tab_slug => $tab_name ) {
+			$class_nav_tab_active = '';
+			
+			if($tab_slug_url === $tab_slug)
+				$class_nav_tab_active = ' nav-tab-active';
+
+		?>
+			<a class="nav-tab<?php echo $class_nav_tab_active; ?>" href="<?php echo add_query_arg( 
+				array( 
+					'page' 		=> $menu_slug, 
+					'tab_slug' 	=> $tab_slug ), 
+					admin_url( 'options-general.php' ) ); ?>"><?php echo $tab_name ?></a>
+		<?php
+		}
+	}
+
 	protected function field_type($type_name): string {
 
 		switch ($type_name) {
 			case "textbox":
-				return 'html_display_text_field';
+				return 'html_display_textbox';
 				break;
 			case "checkbox":
-				return 'html_display_check_box';
+				return 'html_display_checkbox';
 				break;
 			case "textarea":
-				return 'html_display_text_area';
+				return 'html_display_textarea';
+				break;
+			case "select":
+				return 'html_display_select';
 				break;
 			default:
-				return 'html_display_text_field';
+				return 'html_display_textbox';
 			} 
+	}
+
+	protected function get_nav_tabs(): array {
+		extract( $this->register_page_vars );
+		
+		if(isset($nav_tabs))
+			return $nav_tabs;
+
+		return array();
 	}
 	#endregion
 
+	#region static
+	public static function get_option_value ( $option_name , $name ) {
+		$options = get_option( $option_name );
+		if( array_key_exists( $name, $options ) ){
+			return $options[$name];
+		}
+
+		return '';
+	}
+	#endregion
 }
 
 // return new TEK_Admin_Setting("tokitek_options");
