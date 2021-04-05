@@ -20,6 +20,12 @@ class TEK_Admin_Setting
 	 */
 	protected $register_setting_vars;
 
+	/**
+	 * Variables Setting Fields.
+	 * @var array
+	 */
+	protected $register_setting_fields_vars;
+
 	function __construct($option_name){
 		$this->option_name = $option_name;
 		$this->option_group = $option_name."_option_group";
@@ -102,6 +108,7 @@ class TEK_Admin_Setting
 
 		$merged_field = wp_parse_args( $args, $default_field );
 		extract( $merged_field );
+		$this->set_register_setting_fields_vars( $merged_field );
 
 		if(empty($id) || empty($name))
 			return;
@@ -116,21 +123,27 @@ class TEK_Admin_Setting
 	}
 
 	public function validate_options( $input ) {
+		$local_setting_fields_vars = $this->register_setting_fields_vars;
+		foreach ( $local_setting_fields_vars as $field_name => $field_value ) {
 
-		// foreach ( array( 'ga_account_name', 'select_list', 'text_area_desc' ) as $option_name ) { 
-		// 	if ( isset( $input[$option_name] ) ) { 
-		// 		$input[$option_name] = 
-		// 			sanitize_text_field( $input[$option_name] ); 
-		// 	} 
-		// } 
-
-		// foreach ( array( 'track_outgoing_links' ) as $option_name ) { 
-		// 	if ( isset( $input[$option_name] ) ) { 
-		// 		$input[$option_name] = true; 
-		// 	} else { 
-		// 		$input[$option_name] = false; 
-		// 	} 
-		// }
+				switch ($field_value["type"]) {
+					case "textbox":
+					case "textarea":
+						if ( isset( $input[$field_name] ) ) { 
+							$input[$field_name] = sanitize_text_field( $input[$field_name] ); 
+						}
+					break;
+					case "checkbox":
+						if ( isset( $input[$field_name] ) ) { 
+							$input[$field_name] = $input[$field_name]; 
+						} else {
+							$input[$field_name] = false;
+						}
+					break;
+					default:
+						//code to be executed if n is different from all labels;
+			}
+		}
 
 		return $input;
 	}
@@ -145,14 +158,14 @@ class TEK_Admin_Setting
 	public function html_display_check_box( $data = array() ) {
 		extract ( $data ); ?>
 		
-		<input type="checkbox" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" <?php if ( $value ) echo ' checked="checked" '; ?> />
+		<input type="checkbox" name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" <?php if ( $this->value_by_name($data) ) echo ' checked="checked" '; ?> />
 	<?php 
 	}
 
 	public function html_display_text_area( $data = array() ) {
 		extract ( $data ); ?>
 
-		<textarea type='text' name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" rows='5' cols='30'><?php echo $value; ?></textarea>
+		<textarea type='text' name="<?php echo $this->option_name . '[' . esc_attr( $name ) . ']' ?>" rows='5' cols='30'><?php echo esc_html( $this->value_by_name($data) ); ?></textarea>
 	<?php 
 	}
 
@@ -205,6 +218,20 @@ class TEK_Admin_Setting
 		return $option_value;
 	}
 
+	private function set_register_setting_fields_vars ($field): array {
+		$pre_field_vars = array(
+			$field["name"] => array(
+				'id'	=>	$field["id"],
+				'value'	=>	$field["value"],
+				'type'	=>	$field["type"]
+			)
+		);
+
+		$this->register_setting_fields_vars = wp_parse_args( $pre_field_vars, $this->register_setting_fields_vars );
+
+		return $this->register_setting_fields_vars;
+	}
+
 	#endregion
 
 	#region protected
@@ -229,14 +256,20 @@ class TEK_Admin_Setting
 	}
 
 	protected function field_type($type_name): string {
-		if($type_name === 'textbox')
-			return 'html_display_text_field';
-		if($type_name === 'checkbox')
-			return 'html_display_check_box';
-		if($type_name === 'textarea')
-			return 'html_display_text_area';
-		else
-			return '';
+
+		switch ($type_name) {
+			case "textbox":
+				return 'html_display_text_field';
+				break;
+			case "checkbox":
+				return 'html_display_check_box';
+				break;
+			case "textarea":
+				return 'html_display_text_area';
+				break;
+			default:
+				return 'html_display_text_field';
+			} 
 	}
 	#endregion
 
