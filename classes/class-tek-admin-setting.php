@@ -149,8 +149,17 @@ class TEK_Admin_Setting
 		if(empty($id) || empty($name))
 			return;
 
-		add_action( 'admin_init', function() use ($merged_field){
-			$this->register_field_init($merged_field);
+		$arr_setting = $this->default_register_setting_vars;
+		if(isset( $merged_field["setting_id"] )) {
+			if(array_key_exists($setting_id, $this->register_setting_vars)) {
+				$arr_setting = $this->register_setting_vars[$setting_id];
+			}
+		}
+
+		$merged_field_with_setting = wp_parse_args( $arr_setting, $merged_field );
+
+		add_action( 'admin_init', function() use ($merged_field_with_setting){
+			$this->register_field_init($merged_field_with_setting);
 		} );
 	}
 
@@ -244,15 +253,13 @@ class TEK_Admin_Setting
 
 	private function register_field_init($args_field) {
 		extract( $args_field );
-		
-		$arr_setting = $this->default_register_setting_vars;
 
 		add_settings_field( 
 			$id, 
 			$title,
 			array( $this, $this->field_type($type) ), 
-			$arr_setting["setting_section_page"],
-			$arr_setting["setting_section_id"], 
+			$setting_section_page,
+			$setting_section_id, 
 			$args_field 
 		);
 	}

@@ -98,12 +98,12 @@ $admin_setting_page->register_setting(
   )
 );
 
-// $admin_setting_page->register_field(
-// 	array( 
-// 		'id'	    =>  'tek_textbox',
-//     'title' 	=>  __('Publish Key is', 'tos'),
-// 		'name' 	  =>  'key_text',
-// 		'value'   =>  '55555555',
-//     'setting_id'  =>  'lalamove_settings'
-// 	)
-// );
+$admin_setting_page->register_field(
+	array( 
+		'id'	    =>  'key_textbox',
+    'title' 	=>  __('Publish Key is', 'tos'),
+		'name' 	  =>  'key_text',
+		'value'   =>  '55555555',
+    'setting_id'  =>  'tokitek_settings'
+	)
+);
