@@ -29,7 +29,13 @@ class TEK_Admin_Setting
 	protected $register_nav_tab_vars;
 
 	/**
-	 * Variables Setting.
+	 * Variables Setting as Default.
+	 * @var array
+	 */
+	protected $default_register_setting_vars;
+
+	/**
+	 * Variables Settings.
 	 * @var array
 	 */
 	protected $register_setting_vars;
@@ -114,7 +120,12 @@ class TEK_Admin_Setting
 		);
 
 		$merged_setting = wp_parse_args( $args, $default_setting );
-		$this->register_setting_vars = $merged_setting;
+		$this->default_register_setting_vars = $merged_setting;
+
+		$pre_register_setting_vars = array(
+			$merged_setting["setting_id"]	=>	$merged_setting
+		);
+		$this->register_setting_vars = wp_parse_args( $pre_register_setting_vars, $this->register_setting_vars );
 
 		add_action( 'admin_init', function() use ($merged_setting){
 			$this->register_setting_init($merged_setting);
@@ -234,7 +245,7 @@ class TEK_Admin_Setting
 	private function register_field_init($args_field) {
 		extract( $args_field );
 		
-		$arr_setting = $this->register_setting_vars;
+		$arr_setting = $this->default_register_setting_vars;
 
 		add_settings_field( 
 			$id, 
@@ -268,7 +279,7 @@ class TEK_Admin_Setting
 		return $this->register_setting_fields_vars;
 	}
 
-	private function get_tab_slug_url(): string {
+	private function get_tab_slug_url(): ?string {
 		// get query string parameters
 		$tab_slug_url = '';
 		if ( isset( $_GET['tab_slug'] ) ) {
@@ -276,6 +287,23 @@ class TEK_Admin_Setting
 		}
 
 		return $tab_slug_url;
+	}
+
+	private function get_register_setting(): ?array {
+		$tab_slug_url = $this->get_tab_slug_url();
+		$arr_setting = array();
+		if($tab_slug_url === '')
+			$arr_setting = $this->default_register_setting_vars;
+		else {
+			$arr_setting_id = $this->array_key_in_nested_array( "tab_slug", $tab_slug_url, $this->register_setting_vars );
+
+			if( $arr_setting_id === null )
+				$arr_setting = $this->default_register_setting_vars;
+			else
+				$arr_setting = $this->register_setting_vars[$arr_setting_id];
+		}
+
+		return $arr_setting;
 	}
 
 	#endregion
@@ -305,7 +333,7 @@ class TEK_Admin_Setting
 
 	protected function setting_load() {
 		$tab_slug_url = $this->get_tab_slug_url();
-		$arr_setting = $this->register_setting_vars;
+		$arr_setting = $this->get_register_setting();
 
 		if(array_key_exists( 'tab_slug', $arr_setting )){
 
@@ -319,7 +347,7 @@ class TEK_Admin_Setting
 				settings_fields( $arr_setting["setting_id"] );
 				do_settings_sections( $arr_setting["setting_section_page"] );
 			}
-		}
+		}	
 	}
 
 	protected function nav_tabs_load() {
@@ -373,6 +401,19 @@ class TEK_Admin_Setting
 			default:
 				return 'html_display_textbox';
 			} 
+	}
+
+	protected function array_key_in_nested_array( $nested_key , $nested_value, $args ): ?string {
+
+		for ($i = 0; $i < count(array_values($args)); $i++) {
+			if(array_key_exists( $nested_key, array_values($args)[$i])) {
+				if(array_values($args)[$i][$nested_key] === $nested_value) {
+					return array_keys($args)[$i];
+				}
+			}
+		}
+
+		return null;
 	}
 
 	protected function get_nav_tabs(): array {

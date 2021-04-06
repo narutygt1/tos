@@ -86,3 +86,24 @@ $admin_setting_page->register_field(
 		'value'   =>  ''
 	)
 );
+
+
+$admin_setting_page->register_setting(
+  array(
+    'setting_id'      =>  'lalamove_settings',
+    'setting_title'   =>  __('Lalamove Settings', 'tos'),
+    'setting_section_id' => 'lalamove_settings_section',
+    'setting_section_page' => 'lalamove_settings_page',
+    'tab_slug'        =>  'lalamove_setting'
+  )
+);
+
+// $admin_setting_page->register_field(
+// 	array( 
+// 		'id'	    =>  'tek_textbox',
+//     'title' 	=>  __('Publish Key is', 'tos'),
+// 		'name' 	  =>  'key_text',
+// 		'value'   =>  '55555555',
+//     'setting_id'  =>  'lalamove_settings'
+// 	)
+// );
