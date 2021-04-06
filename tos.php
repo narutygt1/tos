@@ -5,7 +5,8 @@
   Description: 
   Author: tokitek
   Version: 1.0
-  Author URI: 
+  Author URI:
+  Text Domain: tos
  */
 
 define( 'TOS_PLUGIN_PATH', __FILE__ );
@@ -17,8 +18,8 @@ $admin_setting_page = new TEK_Admin_Setting("tokitek_options");
 
 $admin_setting_page->register_page(
   array(
-    'page_title'  => 'hello worlds',
-    'menu_title'  => 'tokitek',
+    'page_title'  => __('hello worlds', 'tos'),
+    'menu_title'  => __('Advanced Setting', 'tos'),
     'capability'  => 'manage_options',
     'menu_slug'   => 'hello_page'
   )
@@ -26,16 +27,16 @@ $admin_setting_page->register_page(
 
 $admin_setting_page->register_nav_tabs(
   array(
-      'basic'         =>  'Basic',
-      'order_setting' =>  'Order Setting',
-      'lalamove_setting'  =>  'Lalamove'
+      'basic'         =>  __('Basic', 'tos'),
+      'order_setting' =>  __('Order Setting', 'tos'),
+      'lalamove_setting'  =>  __('Lalamove', 'tos')
   )
 );
 
 $admin_setting_page->register_setting(
   array(
     'setting_id'      =>  'tokitek_settings',
-    'setting_title'   =>  'Main Settings',
+    'setting_title'   =>  __('Main Settings', 'tos'),
     'setting_section_id' => 'tokitek_main_section',
     'setting_section_page' => 'tokitek_settings_section',
     'tab_slug'        =>  'order_setting'
@@ -45,7 +46,7 @@ $admin_setting_page->register_setting(
 $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_textbox',
-    'title' 	=>  'My Name is',
+    'title' 	=>  __('My Name is', 'tos'),
 		'name' 	  =>  'name_text',
 		'value'   =>  'tokitek'
 	)
@@ -54,7 +55,7 @@ $admin_setting_page->register_field(
 $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_checkbox',
-		'title' 	=>  'He is Smart',
+		'title' 	=>  __('He is Smart', 'tos'),
     'name' 	  =>  'is_smart',
 		'value'   =>  true,
 		'type'	  =>  'checkbox' 
@@ -64,7 +65,7 @@ $admin_setting_page->register_field(
 $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_select',
-		'title' 	=>  'Default Page',
+		'title' 	=>  __('Default Page', 'tos'),
     'name' 	  =>  'default_page',
 		'value'   =>  'Second',
 		'type'	  =>  'select',
@@ -79,7 +80,7 @@ $admin_setting_page->register_field(
 $admin_setting_page->register_field(
 	array( 
 		'id'	    =>  'tek_textarea',
-    'title' 	=>  'Details',
+    'title' 	=>  __('Details', 'tos'),
 		'name' 	  =>  'details',
     'type'	  =>  'textarea',
 		'value'   =>  ''

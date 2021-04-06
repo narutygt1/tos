@@ -46,7 +46,7 @@ class TEK_Admin_Setting
 		$this->option_group = $option_name."_option_group";
 
 		if(empty($option_name))
-			throw new Exception('Error unset to register_activation_hook: {Name} of the option to retrieve');
+			throw new Exception(sprintf( __('Error unset to register_activation_hook: %1$s of the option to retrieve', 'tos'), "\$option_name"));
 			
         // Register function to be called when the plugin is activated
 		register_activation_hook( TOS_PLUGIN_PATH, function(){
@@ -268,20 +268,32 @@ class TEK_Admin_Setting
 		return $this->register_setting_fields_vars;
 	}
 
+	private function get_tab_slug_url(): string {
+		// get query string parameters
+		$tab_slug_url = '';
+		if ( isset( $_GET['tab_slug'] ) ) {
+			$tab_slug_url = strval( $_GET['tab_slug'] ); 
+		}
+
+		return $tab_slug_url;
+	}
+
 	#endregion
 
 	#region protected
 	protected function config_page_load() {
-		$arr_setting = $this->register_setting_vars;
-		$this->nav_tabs_load();
+		$arr_page = $this->register_page_vars;
 		?>
 
 		<div id="<?php echo $this->option_name ?>" class="wrap">
 
+			<h1><?php echo $arr_page["page_title"] ?></h1>
+
+			<?php $this->nav_tabs_load(); ?>
+
 			<form name="<?php echo $this->option_name ?>_form_settings_api" method="post" action="options.php">
 
-			<?php settings_fields( $arr_setting["setting_id"] ); ?>
-			<?php do_settings_sections( $arr_setting["setting_section_page"] ); ?> 
+			<?php $this->setting_load(); ?>
 
 			<input type="submit" value="Submit" class="button-primary" />
 			
@@ -291,21 +303,41 @@ class TEK_Admin_Setting
 	<?php
 	}
 
-	public function nav_tabs_load() {
+	protected function setting_load() {
+		$tab_slug_url = $this->get_tab_slug_url();
+		$arr_setting = $this->register_setting_vars;
+
+		if(array_key_exists( 'tab_slug', $arr_setting )){
+
+			if($tab_slug_url === $arr_setting["tab_slug"]) {
+				settings_fields( $arr_setting["setting_id"] );
+				do_settings_sections( $arr_setting["setting_section_page"] );
+			}
+
+		}else {
+			if(!isset($this->register_nav_tab_vars)){
+				settings_fields( $arr_setting["setting_id"] );
+				do_settings_sections( $arr_setting["setting_section_page"] );
+			}
+		}
+	}
+
+	protected function nav_tabs_load() {
+
+		if(!isset($this->register_nav_tab_vars))
+			return;
 
 		extract ( $this->register_page_vars );
-
-		// get query string parameters
-		if ( isset( $_GET['tab_slug'] ) ) {
-			$tab_slug_url = strval( $_GET['tab_slug'] ); 
-		}else{
-			$tab_slug_url = '';
-		}
-
+		$tab_slug_url = $this->get_tab_slug_url();
+		?> 
+		
+		<h2 class="nav-tab-wrapper"> 
+		<?php
+		$i = 0;
 		foreach ( $this->register_nav_tab_vars as $tab_slug => $tab_name ) {
 			$class_nav_tab_active = '';
 			
-			if($tab_slug_url === $tab_slug)
+			if($tab_slug_url === $tab_slug || ( $tab_slug_url === '' && $i == 0 ))
 				$class_nav_tab_active = ' nav-tab-active';
 
 		?>
@@ -315,7 +347,12 @@ class TEK_Admin_Setting
 					'tab_slug' 	=> $tab_slug ), 
 					admin_url( 'options-general.php' ) ); ?>"><?php echo $tab_name ?></a>
 		<?php
+		$i++;
 		}
+		?> 
+		</h2><br /> 
+
+		<?php
 	}
 
 	protected function field_type($type_name): string {
